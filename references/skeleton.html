@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的文档标题 · 副标题</title>
+<style>
+/* =========================================================
+   互动式学习文档 · 标准 UI 主题（与 SEVA 代码阅读指南一致）
+   用法：整段内嵌到文档 <style> 中，禁止改配色/布局。
+   设计令牌：--paper:#f6f7f4 纸感米白背景；--accent:#0e7c5b 绿主色；
+   左侧 264px 目录 sidebar；右侧 330px 悬停解释面板；圆角 12~14px。
+   ========================================================= */
+:root{
+  --ink:#1c2126; --ink-2:#3c464f; --muted:#6b7680; --faint:#9aa3ab;
+  --paper:#f6f7f4; --card:#ffffff; --line:#e3e6e1; --line-2:#d4d9d2;
+  --accent:#0e7c5b; --accent-soft:#e2f1ea; --accent-ink:#0a5c44;
+  --evo:#0e9f6e; --evo-soft:#e3f4ec;      /* 进化 · 绿 */
+  --struc:#2563eb; --struc-soft:#e7eefc;  /* 结构 · 蓝 */
+  --plm:#7c3aed; --plm-soft:#f0e9fd;      /* 语言模型 · 紫 */
+  --stat:#d97706; --stat-soft:#fdf1df;    /* 统计 · 橙 */
+  --warn:#b45309; --warn-soft:#fdf3e3;
+  --danger:#b91c1c; --danger-soft:#fdeaea;
+  --code-bg:#0f1419; --code-ink:#e6e9ec;
+  --radius:10px;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,"Courier New",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.75;font-size:16px}
+::selection{background:#bde3d4}
+
+/* ===== 阅读进度条 ===== */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#0e9f6e,#2563eb);z-index:999}
+
+/* ===== 布局 ===== */
+.layout{display:grid;grid-template-columns:264px minmax(0,1fr)}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:264px;background:var(--card);border-right:1px solid var(--line);overflow-y:auto;padding:22px 14px 40px;z-index:50}
+.sidebar .logo{display:flex;align-items:center;gap:10px;padding:0 10px 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.logo-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;letter-spacing:.5px}
+.logo-title{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.35}
+.logo-sub{font-size:11.5px;color:var(--muted)}
+.toc{list-style:none}
+.toc li{margin:1px 0}
+.toc a{display:flex;gap:8px;align-items:baseline;padding:6.5px 10px;border-radius:7px;color:var(--ink-2);text-decoration:none;font-size:13.5px;line-height:1.45;border-left:2px solid transparent}
+.toc a:hover{background:var(--paper)}
+.toc a.active{background:var(--accent-soft);color:var(--accent-ink);border-left-color:var(--accent);font-weight:600}
+.toc .num{font-family:var(--mono);font-size:11px;color:var(--faint);flex:none}
+.toc a.active .num{color:var(--accent)}
+.toc .ch-sub{margin-left:26px;font-size:12.5px;color:var(--muted)}
+.toc-head{font-size:11px;letter-spacing:1.5px;color:var(--faint);font-weight:700;padding:14px 10px 4px}
+
+.main{grid-column:2;max-width:920px;padding:0 48px 120px;margin:0 auto;min-width:0}
+article{width:100%}
+
+/* ===== 封面 ===== */
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.hero .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:1.2px;color:var(--accent);background:var(--accent-soft);padding:5px 12px;border-radius:99px;margin-bottom:22px}
+.hero h1{font-size:34px;line-height:1.3;font-weight:800;letter-spacing:-.5px;margin-bottom:14px}
+.hero h1 .grad{background:linear-gradient(90deg,#0e7c5b,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:16.5px;color:var(--ink-2);max-width:640px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.chip{font-size:12.5px;color:var(--ink-2);background:var(--card);border:1px solid var(--line-2);padding:6px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:6px}
+.chip b{color:var(--accent)}
+
+/* ===== 路线卡片 ===== */
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 10px}
+.route{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;transition:transform .15s ease,box-shadow .15s ease}
+.route:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(28,33,38,.07)}
+.route .r-time{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent)}
+.route h3{font-size:15.5px;margin:6px 0 6px}
+.route p{font-size:13px;color:var(--muted);line-height:1.6}
+.route .r-tag{display:inline-block;margin-top:8px;font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+
+/* ===== 章节 ===== */
+section.chapter{padding:44px 0 12px;border-bottom:1px solid var(--line)}
+.chapter-head{display:flex;gap:18px;align-items:flex-start;margin-bottom:18px}
+.chapter-no{flex:none;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;font-family:var(--mono);color:#fff}
+.ch-no-1{background:#0e7c5b}.ch-no-2{background:#2563eb}.ch-no-3{background:#7c3aed}.ch-no-4{background:#0e7c5b}.ch-no-5{background:#2563eb}.ch-no-6{background:#d97706}.ch-no-7{background:#0e7c5b}.ch-no-8{background:#b91c1c}.ch-no-9{background:#7c3aed}.ch-no-10{background:#1c2126}
+.chapter-head h2{font-size:25px;font-weight:800;letter-spacing:-.3px;line-height:1.35;padding-top:4px}
+.chapter-head .guide{font-size:13.5px;color:var(--muted);margin-top:4px}
+h3.block{font-size:19px;font-weight:700;margin:34px 0 12px;padding-left:12px;border-left:4px solid var(--accent);line-height:1.4}
+h4{font-size:16px;font-weight:700;margin:22px 0 8px}
+p{margin:10px 0;color:var(--ink-2)}
+strong{color:var(--ink)}
+em{font-style:normal;color:var(--accent-ink);font-weight:600}
+ul,ol{margin:10px 0 10px 22px;color:var(--ink-2)}
+li{margin:5px 0}
+code.inline{font-family:var(--mono);font-size:.86em;background:#edf0ec;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#33415c}
+a{color:var(--accent)}
+
+/* ===== 提示框 ===== */
+.callout{border-radius:var(--radius);padding:14px 16px 14px 46px;margin:18px 0;position:relative;font-size:14.5px;line-height:1.7}
+.callout::before{position:absolute;left:15px;top:15px;font-size:17px}
+.callout .co-title{font-weight:700;font-size:13.5px;margin-bottom:3px}
+.co-analogy{background:var(--accent-soft);color:#0a4a38}
+.co-analogy::before{content:"💡"}
+.co-pitfall{background:var(--warn-soft);color:#7a4a06}
+.co-pitfall::before{content:"⚠️"}
+.co-find{background:var(--struc-soft);color:#1e3f8f}
+.co-find::before{content:"🔍"}
+.co-takeaway{background:var(--plm-soft);color:#4c1d95}
+.co-takeaway::before{content:"🎯"}
+.co-note{background:#eef0f2;color:#333c45}
+.co-note::before{content:"📌"}
+
+/* ===== 图片/图解 ===== */
+.figure{margin:24px 0;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 10px}
+.figure svg{width:100%;height:auto;display:block}
+.fig-cap{font-size:12.5px;color:var(--muted);text-align:center;padding:10px 6px 4px;line-height:1.6}
+.fig-cap b{color:var(--ink-2)}
+.fig-label{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--faint);text-align:center;margin-bottom:8px}
+
+/* ===== 代码块 ===== */
+.codewrap{position:relative;margin:18px 0;border-radius:var(--radius);overflow:hidden;border:1px solid #1c232b;background:var(--code-bg)}
+.codewrap .code-head{display:flex;align-items:center;gap:8px;background:#131a21;padding:7px 14px;border-bottom:1px solid #22303c;font-family:var(--mono);font-size:12px;color:#8fa1b3}
+.codewrap .code-head .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.codewrap .code-head .fname{flex:1}
+pre.code{padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--code-ink);tab-size:4}
+pre.code .ln{display:inline-block;width:2.2em;color:#4d5d6d;user-select:none}
+pre.code .cm{color:#5c7a6a;font-style:italic}
+pre.code .kw{color:#c792ea}
+pre.code .st{color:#a5d6a7}
+pre.code .nu{color:#f78c6c}
+pre.code .fn{color:#82aaff}
+pre.code .cl{color:#ffcb6b}
+pre.code .dc{color:#89ddff}
+pre.code .op{color:#89ddff}
+/* ===== 代码行悬停解释（新增） ===== */
+pre.code .cline{display:block;width:max-content;min-width:100%;box-sizing:border-box;border-left:3px solid transparent;padding-left:5px;cursor:pointer;transition:background .12s,border-color .12s}
+pre.code .cline:hover{background:rgba(56,139,253,.16);border-left-color:#58a6ff;box-shadow:inset 0 0 0 1px rgba(56,139,253,.22)}
+pre.code .cline:hover .ln{color:#58a6ff}
+pre.code .cline.active{background:rgba(56,139,253,.22);border-left-color:#58a6ff}
+#line-hint{position:fixed;right:14px;top:50%;transform:translateY(-50%);width:330px;max-height:64vh;overflow-y:auto;background:#161d26;border:1px solid #2a3644;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.35);z-index:999;font-size:13px;color:#c9d2da;transition:opacity .18s,transform .18s,visibility .18s;visibility:visible}
+#line-hint.hidden{opacity:0;visibility:hidden;transform:translateY(-50%) translateX(24px);pointer-events:none}
+#line-hint .lh-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #22303c;font-family:var(--mono);font-size:11.5px;color:#8fa1b3}
+#line-hint .lh-file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#line-hint .lh-line{background:#22303c;color:#89ddff;padding:2px 9px;border-radius:20px;white-space:nowrap}
+#line-hint .lh-code{padding:10px 14px;color:#e3ecf4;border-bottom:1px dashed #22303c;font-size:12.5px;line-height:1.55;word-break:break-all;font-family:var(--mono)}
+#line-hint .lh-explain{padding:12px 14px;color:#c9d2da;line-height:1.75;font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:13.5px}
+#line-hint .lh-explain b{color:#ffcb6b}
+#line-hint .lh-tip{color:#6b7b8a;font-style:italic;font-size:12.5px}
+@media (max-width:1180px){#line-hint{display:none}}
+
+/* ===== 表格 ===== */
+.tbl-wrap{margin:18px 0;overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+table.doc{width:100%;border-collapse:collapse;font-size:13.5px}
+table.doc th{background:#f0f2ee;text-align:left;padding:9px 12px;font-weight:700;color:var(--ink);border-bottom:1px solid var(--line-2);white-space:nowrap}
+table.doc td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+table.doc tr:last-child td{border-bottom:none}
+table.doc tr:hover td{background:#fafbf9}
+table.doc .hl-row td{background:var(--accent-soft);font-weight:600;color:var(--accent-ink)}
+.num-r{font-family:var(--mono);font-size:12.5px;text-align:right;white-space:nowrap}
+.good{color:var(--accent);font-weight:700}
+.bad{color:var(--danger);font-weight:700}
+
+/* ===== 折叠深入 ===== */
+details.deep{margin:14px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+details.deep summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:14.5px;color:var(--ink);list-style:none;display:flex;align-items:center;gap:8px}
+details.deep summary::before{content:"▸";color:var(--accent);transition:transform .15s}
+details.deep[open] summary::before{transform:rotate(90deg)}
+details.deep .deep-body{padding:2px 16px 14px;border-top:1px dashed var(--line);font-size:14px}
+details.deep .deep-body p{margin:8px 0}
+
+/* ===== 测验 ===== */
+.quiz{margin:20px 0}
+.q-item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin:14px 0}
+.q-item .q-text{font-weight:700;font-size:15px;margin-bottom:12px}
+.q-item .q-text .q-no{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--accent);color:#fff;font-size:13px;margin-right:10px;font-family:var(--mono)}
+.q-opt{display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line-2);border-radius:8px;padding:9px 14px;margin:6px 0;font-size:14px;color:var(--ink-2);cursor:pointer;font-family:var(--sans);transition:border-color .12s,background .12s}
+.q-opt:hover{border-color:var(--accent)}
+.q-opt.correct{background:var(--evo-soft);border-color:var(--evo);color:var(--accent-ink);font-weight:600}
+.q-opt.wrong{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+.q-opt:disabled{cursor:default}
+.q-feedback{display:none;margin-top:10px;font-size:13.5px;padding:10px 14px;border-radius:8px;background:var(--paper);border:1px dashed var(--line-2);color:var(--ink-2)}
+.q-feedback.show{display:block}
+
+/* ===== 词汇表 ===== */
+.gloss{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;overflow:hidden}
+.gloss summary{cursor:pointer;padding:11px 18px;font-size:14px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.gloss summary::after{content:"+";font-family:var(--mono);color:var(--faint);font-size:16px}
+.gloss[open] summary::after{content:"–"}
+.gloss .gloss-body{padding:0 18px 14px;font-size:13.5px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:10px}
+.gloss .gloss-body b{color:var(--accent-ink)}
+
+/* ===== 小结 ===== */
+.section-summary{background:linear-gradient(180deg,#fbfcfa,#f2f6f3);border:1px solid var(--line-2);border-radius:var(--radius);padding:16px 20px;margin:26px 0 8px}
+.section-summary h4{font-size:14px;color:var(--accent-ink);margin-bottom:8px;letter-spacing:.5px}
+.section-summary ul{margin:0 0 0 20px}
+.section-summary li{font-size:14px;margin:4px 0}
+
+footer{border-top:1px solid var(--line);margin-top:50px;padding:28px 0 10px;color:var(--faint);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.totop{position:fixed;right:26px;bottom:26px;width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line-2);color:var(--accent);font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(28,33,38,.10);display:none;align-items:center;justify-content:center;z-index:60}
+.totop.show{display:flex}
+
+@media (max-width:960px){
+  .sidebar{display:none}
+  .layout{grid-template-columns:1fr}
+  .main{grid-column:1;padding:0 20px 100px}
+  .routes{grid-template-columns:1fr}
+  .hero h1{font-size:27px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<div class="layout">
+<!-- ====== 侧边目录（按章节改：href 对应各 section 的 id） ====== -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">XX</div>
+    <div>
+      <div class="logo-title">文档标题</div>
+      <div class="logo-sub">副标题 · 图文互动版</div>
+    </div>
+  </div>
+  <div class="toc-head">目录</div>
+  <ul class="toc">
+    <li><a href="#start"><span class="num">00</span> 开始之前：怎么读</a></li>
+    <li><a href="#ch1"><span class="num">01</span> 第一章标题</a></li>
+    <li><a href="#ch2"><span class="num">02</span> 第二章标题</a></li>
+    <li><a href="#glossary"><span class="num">附</span> 词汇表</a></li>
+  </ul>
+</nav>
+
+<!-- ====== 正文 ====== -->
+<main class="main">
+<article>
+
+<!-- ============ 封面 ============ -->
+<header class="hero" id="start">
+  <span class="kicker">📖 互动式学习文档 · 适合完全零基础</span>
+  <h1>主标题 <span class="grad">重点词</span><br>副标题</h1>
+  <p class="lead">一句话介绍这份文档讲什么、适合谁。（假设读者没有任何背景知识。）</p>
+  <div class="hero-badges">
+    <span>📚 素材类型</span><span>🎯 读者对象</span><span>⏱ 预计阅读时间</span>
+  </div>
+  <div class="read-paths">
+    <h3>⏱ 阅读路线（按需选择）</h3>
+    <p><b>20 分钟速览</b>——只读第 1、2 章 + 词汇表。<b>1 小时精读</b>——按顺序读完。<b>半天动手</b>——边读边对照原始材料。</p>
+  </div>
+</header>
+
+<!-- ============ 第一章（示例：每类组件一个） ============ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <div class="chapter-no ch-no-1">01</div>
+    <div>
+      <h2>第一章标题</h2>
+      <p class="guide">本章目标：一句话说明读者学完能知道什么。</p>
+    </div>
+  </div>
+
+  <!-- 类比提示框（图标由 CSS 伪元素渲染，co-title 文本里不要写 emoji） -->
+  <div class="callout co-analogy"><div class="co-title">类比：用生活例子解释</div>
+  <p>把陌生概念翻译成读者熟悉的东西……</p></div>
+
+  <!-- 细节提示框 -->
+  <div class="callout co-note"><div class="co-title">一个重要的细节</div>
+  <p>补充说明……</p></div>
+
+  <!-- 手绘 SVG 图解 -->
+  <div class="figure">
+    <div class="fig-label">图 1-1 · 图解标题</div>
+    <svg viewBox="0 0 840 300" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC, Microsoft YaHei, sans-serif">
+      <!-- 手绘：方框 + 箭头 + 文字即可，颜色用主题色（绿 #0e9f6e / 蓝 #2563eb / 紫 #7c3aed / 橙 #d97706） -->
+      <rect x="60" y="80" width="200" height="80" rx="10" fill="#e3f4ec" stroke="#0e9f6e"/>
+      <text x="160" y="125" text-anchor="middle" font-size="13" fill="#0a5c44">输入</text>
+    </svg>
+    <div class="fig-cap">图注：解释这张图告诉读者什么。</div>
+  </div>
+
+  <!-- 代码块（配逐行解释：id 必须唯一，pre 内纯文本，行号/高亮由 JS 生成） -->
+  <div class="codewrap" id="cb-example"><div class="code-head"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="fname">example.py · 核心逻辑</span></div>
+<pre class="code">def add(a, b):
+    return a + b   # 这是注释</pre></div>
+
+  <!-- 发现 / 坑 / 行动三类提示框 -->
+  <div class="callout co-find"><div class="co-title">秘密：读文档才能发现的点</div>
+  <p>……</p></div>
+  <div class="callout co-pitfall"><div class="co-title">坑：容易出错的地方</div>
+  <p>……</p></div>
+  <div class="callout co-takeaway"><div class="co-title">行动：你该怎么做</div>
+  <p>……</p></div>
+
+  <!-- 折叠深挖（读者可能卡住的点） -->
+  <details class="deep">
+    <summary>🤔 小白追问：常见疑问？</summary>
+    <div class="deep-body"><p>详细解答……</p></div>
+  </details>
+
+  <!-- 数据表格 -->
+  <div class="tbl-wrap"><table class="doc">
+    <tr><th>项目</th><th>值</th><th>备注</th></tr>
+    <tr><td>示例行</td><td>123</td><td>说明</td></tr>
+  </table></div>
+
+  <div class="section-summary">
+    <h4>📌 第 1 章小结</h4>
+    <ul>
+      <li>本章最重要的 3 个点……</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 词汇表 ============ -->
+<section class="chapter" id="glossary">
+  <div class="chapter-head">
+    <div class="chapter-no ch-no-9">附</div>
+    <div>
+      <h2>词汇表</h2>
+      <p class="guide">点击展开，一句话定义 + 在本文档中的角色。</p>
+    </div>
+  </div>
+  <details class="gloss"><summary>术语一</summary><p>一句话定义。</p></details>
+  <details class="gloss"><summary>术语二</summary><p>一句话定义。</p></details>
+</section>
+
+</article>
+</main>
+</div>
+
+<button class="totop" id="totop" title="回到顶部">↑</button>
+
+<div id="line-hint" class="hidden" aria-hidden="true">
+  <div class="lh-head"><span class="lh-file"></span><span class="lh-line"></span></div>
+  <div class="lh-code"></div>
+  <div class="lh-explain"></div>
+</div>
+
+<script>
+
+/* ===== 迷你 Python 语法高亮（无外部依赖） ===== */
+(function(){
+  var KW = /\b(def|class|return|if|else|elif|for|while|in|not|and|or|import|from|as|with|None|True|False|self|lambda|pass|break|continue|try|except|raise|is|del|global|yield|assert)\b/;
+  var files = document.querySelectorAll('pre.code');
+  for (var i = 0; i < files.length; i++) {
+    var pre = files[i];
+    var code = pre.textContent.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var lines = code.split('\n');
+    var out = [];
+    for (var j = 0; j < lines.length; j++) {
+      var line = lines[j];
+      // 高亮整行：注释
+      var html = '';
+      var cidx = line.indexOf('#');
+      var core = cidx >= 0 ? line.slice(0, cidx) : line;
+      var cmt = cidx >= 0 ? line.slice(cidx) : '';
+            // ① 字符串 → 占位符（\u0001 + 类型字母×N + \u0002），防止后续正则误伤
+      var strs = [];
+      core = core.replace(/'[^']*'|"[^"]*"/g, function(m){
+        strs.push(m);
+        return '\u0001S' + new Array(strs.length).join('A') + '\u0002';
+      });
+      // ② 数字 → 占位符
+      var nums = [];
+      core = core.replace(/\b\d+(?:\.\d+)?\b/g, function(m){
+        nums.push(m);
+        return '\u0001N' + new Array(nums.length).join('A') + '\u0002';
+      });
+      // ③ 关键字 → 占位符
+      var kws = [];
+      core = core.replace(KW, function(m){
+        kws.push(m);
+        return '\u0001K' + new Array(kws.length).join('A') + '\u0002';
+      });
+      // ④ 函数调用 → 占位符
+      var fns = [];
+      core = core.replace(/\b([A-Za-z_]\w*)(?=\()/g, function(m){
+        fns.push(m);
+        return '\u0001F' + new Array(fns.length).join('A') + '\u0002';
+      });
+      // ⑤ 装饰器 → 占位符
+      var dcs = [];
+      core = core.replace(/(@\w+)/g, function(m){
+        dcs.push(m);
+        return '\u0001D' + new Array(dcs.length).join('A') + '\u0002';
+      });
+      // ⑥ 统一还原成高亮 span（此时文本里只剩占位符，不会再被任何正则误伤）
+      core = core.replace(/\u0001S(A*)\u0002/g, function(m,a){ return '<span class="st">'+strs[a.length]+'</span>'; })
+                 .replace(/\u0001N(A*)\u0002/g, function(m,a){ return '<span class="nu">'+nums[a.length]+'</span>'; })
+                 .replace(/\u0001K(A*)\u0002/g, function(m,a){ return '<span class="kw">'+kws[a.length]+'</span>'; })
+                 .replace(/\u0001F(A*)\u0002/g, function(m,a){ return '<span class="fn">'+fns[a.length]+'</span>'; })
+                 .replace(/\u0001D(A*)\u0002/g, function(m,a){ return '<span class="dc">'+dcs[a.length]+'</span>'; });
+      if (cmt) html = '<span class="cm">'+cmt+'</span>';
+      out.push('<span class="cline" data-line="'+(j+1)+'">' + '<span class="ln">'+(j+1)+'</span>' + core + html + '</span>');
+    }
+    pre.innerHTML = out.join('');   // 不加换行符：cline 是 block 元素，自然换行pre.innerHTML = out.join('');   // 不加换行符：cline 是 block 元素，自然换行
+  }
+})();
+
+/* ===== 阅读进度条 ===== */
+(function(){
+  var bar = document.getElementById('progress');
+  function upd(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    bar.style.width = p + '%';
+    var t = document.getElementById('totop');
+    if (h.scrollTop > 600) t.classList.add('show'); else t.classList.remove('show');
+  }
+  window.addEventListener('scroll', upd, {passive:true});
+  upd();
+  document.getElementById('totop').addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+})();
+
+/* ===== 侧边目录滚动高亮（scrollspy） ===== */
+(function(){
+  var links = document.querySelectorAll('.toc a');
+  var map = {};
+  for (var i = 0; i < links.length; i++) {
+    var id = links[i].getAttribute('href').slice(1);
+    map[id] = links[i];
+  }
+  var sections = document.querySelectorAll('section.chapter, header.hero');
+  function spy(){
+    var pos = window.scrollY + 120;
+    var cur = null;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].offsetTop <= pos) cur = sections[i].id;
+    }
+    for (var k in map) {
+      if (map.hasOwnProperty(k)) map[k].classList.toggle('active', k === cur);
+    }
+  }
+  window.addEventListener('scroll', spy, {passive:true});
+  spy();
+})();
+
+/* ===== 小测验 ===== */
+(function(){
+  var items = document.querySelectorAll('.q-item');
+  for (var i = 0; i < items.length; i++) {
+    (function(item){
+      var opts = item.querySelectorAll('.q-opt');
+      var answer = parseInt(item.getAttribute('data-answer'), 10);
+      var fb = item.querySelector('.q-feedback');
+      for (var j = 0; j < opts.length; j++) {
+        (function(opt, idx){
+          opt.addEventListener('click', function(){
+            if (item.classList.contains('done')) return;
+            item.classList.add('done');
+            for (var k = 0; k < opts.length; k++) opts[k].disabled = true;
+            if (idx === answer) {
+              opt.classList.add('correct');
+            } else {
+              opt.classList.add('wrong');
+              opts[answer].classList.add('correct');
+            }
+            fb.classList.add('show');
+          });
+        })(opts[j], j);
+      }
+    })(items[i]);
+  }
+})();
+
+/* ===== 逐行解释：悬停高亮 + 右侧面板（新增功能） ===== */
+var LINE_EXPLAIN = {
+  /* 逐行解释数据模板（可选功能）：
+     'cb-attn':{
+       1:'解释第 1 行……',
+       2:'解释第 2 行……',
+     },
+     行号 = 渲染行号（含空行/注释行），写完用 check-explain-lines.py 核对 */
+};
+(function(){
+  var hint = document.getElementById('line-hint');
+  if(!hint) return;
+  var fEl = hint.querySelector('.lh-file'), nEl = hint.querySelector('.lh-line'),
+      cEl = hint.querySelector('.lh-code'), xEl = hint.querySelector('.lh-explain');
+  var cur = null, locked = false;
+
+  function plainText(lineEl){
+    var c = lineEl.cloneNode(true);
+    var ln = c.querySelector('.ln'); if(ln) ln.remove();
+    return c.textContent;
+  }
+  function show(lineEl){
+    if(cur && cur !== lineEl) cur.classList.remove('active');
+    cur = lineEl;
+    lineEl.classList.add('active');
+    var pre = lineEl.closest('pre.code');
+    var wrap = pre ? pre.closest('.codewrap') : null;
+    var bid = wrap ? wrap.id : '';
+    var ln = parseInt(lineEl.getAttribute('data-line'), 10);
+    var exp = (LINE_EXPLAIN[bid] || {})[ln];
+    fEl.textContent = wrap ? ((wrap.querySelector('.fname')||{}).textContent || '') : '';
+    nEl.textContent = '第 ' + ln + ' 行';
+    cEl.textContent = plainText(lineEl);
+    xEl.innerHTML = exp ? exp : '<span class="lh-tip">这一行没有单独解释——试试悬停其他行。</span>';
+    hint.classList.remove('hidden');
+  }
+  function hide(){
+    if(locked) return;
+    if(cur){ cur.classList.remove('active'); cur = null; }
+    hint.classList.add('hidden');
+  }
+  document.addEventListener('mouseover', function(e){
+    var t = e.target;
+    var cl = t.closest ? t.closest('.cline') : null;
+    if(cl){ show(cl); return; }
+    if(!hint.contains(t)) hide();
+  });
+  document.addEventListener('click', function(e){
+    var cl = e.target.closest ? e.target.closest('.cline') : null;
+    if(cl){ locked = !locked; show(cl); return; }
+    if(!hint.contains(e.target)){ locked = false; hide(); }
+  });
+})();
+
+</script>
+</body>
+</html>
